@@ -22,11 +22,9 @@ import {
   exposureByIndustry,
   generatePortfolioTrend,
   recommendedActions,
-  riskScoreDistribution,
   summariseByCategory,
   topRiskiestCustomers,
 } from "@/lib/aggregations";
-import { categoriseRiskScore } from "@/lib/riskScoring";
 import RiskBadge from "@/components/RiskBadge";
 
 const CATEGORY_COLORS: Record<RiskCategory, string> = {
@@ -125,7 +123,6 @@ export default function DashboardPage() {
   const topRisky = topRiskiestCustomers(customers, 10);
   const industryExposure = exposureByIndustry(customers);
   const trend = generatePortfolioTrend(customers);
-  const distribution = riskScoreDistribution(customers);
   const actions = recommendedActions(customers);
 
   const totalCustomers = customers.length;
@@ -254,32 +251,13 @@ export default function DashboardPage() {
         </ChartCard>
       </section>
 
-      {/* Distribution + trend */}
-      <section className="grid gap-4 lg:grid-cols-2">
-        <ChartCard
-          title="Portfolio Risk Distribution"
-          subtitle="Customer count by risk-score decile (0 = lowest risk, 100 = highest)"
-        >
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={distribution}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e5e9" />
-              <XAxis dataKey="bucket" stroke="#5b6572" fontSize={11} />
-              <YAxis stroke="#5b6572" fontSize={12} allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="count" name="Customers" radius={[4, 4, 0, 0]}>
-                {distribution.map((entry) => (
-                  <Cell key={entry.bucket} fill={CATEGORY_COLORS[categoriseRiskScore(entry.midpoint)]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
+      {/* Trend */}
+      <section>
         <ChartCard
           title="Portfolio Risk Trend"
           subtitle="Illustrative trend leading up to current position"
         >
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={280}>
             <LineChart data={trend}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e5e9" />
               <XAxis dataKey="period" stroke="#5b6572" fontSize={12} />
