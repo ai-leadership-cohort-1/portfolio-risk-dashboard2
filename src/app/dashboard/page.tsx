@@ -25,6 +25,7 @@ import {
   summariseByCategory,
   topRiskiestCustomers,
 } from "@/lib/aggregations";
+import { RISK_THRESHOLDS } from "@/lib/riskScoring";
 import RiskBadge from "@/components/RiskBadge";
 
 const CATEGORY_COLORS: Record<RiskCategory, string> = {
@@ -117,7 +118,7 @@ export default function DashboardPage() {
     );
   }
 
-  const { customers, csvFileName, pdfFileName, analysedAt } = result;
+  const { customers, rules, weights, csvFileName, pdfFileName, pdfPageCount, analysedAt } = result;
 
   const categorySummary = summariseByCategory(customers);
   const topRisky = topRiskiestCustomers(customers, 10);
@@ -320,19 +321,79 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Recommended actions */}
-      <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-[var(--foreground)] mb-3">
-          Recommended Actions
-        </h2>
-        <ul className="space-y-2">
-          {actions.map((action, idx) => (
-            <li key={idx} className="flex gap-2.5 text-sm text-[var(--foreground)]">
-              <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--accent)]" />
-              <span className="leading-relaxed">{action}</span>
-            </li>
-          ))}
-        </ul>
+      {/* Recommended actions + scoring methodology */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-[var(--foreground)] mb-3">
+            Recommended Actions
+          </h2>
+          <ul className="space-y-2">
+            {actions.map((action, idx) => (
+              <li key={idx} className="flex gap-2.5 text-sm text-[var(--foreground)]">
+                <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--accent)]" />
+                <span className="leading-relaxed">{action}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">
+            Scoring Methodology
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+            Risk Score = ({Math.round(weights.creditRiskWeight * 100)}% × Credit
+            Score Factor) + ({Math.round(weights.repaymentRiskWeight * 100)}% ×
+            Repayment Status Factor) + ({Math.round(weights.exposureWeight * 100)}
+            % × Exposure Factor), each factor normalised 0–100.
+          </p>
+          <div className="mt-3 space-y-1 text-sm text-[var(--foreground)]">
+            <p>
+              <span className="font-medium">Green (Low Risk):</span> score 0–
+              {RISK_THRESHOLDS.greenMax}
+            </p>
+            <p>
+              <span className="font-medium">Amber (Medium Risk):</span> score{" "}
+              {RISK_THRESHOLDS.greenMax + 1}–{RISK_THRESHOLDS.amberMax}
+            </p>
+            <p>
+              <span className="font-medium">Red (High Risk):</span> score{" "}
+              {RISK_THRESHOLDS.amberMax + 1}–100
+            </p>
+          </div>
+
+          <h3 className="mt-5 text-sm font-semibold text-[var(--foreground)]">
+            Extracted Policy Highlights
+          </h3>
+          {pdfFileName ? (
+            <>
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                Heuristic extraction from {pdfFileName}
+                {pdfPageCount ? ` — ${pdfPageCount} page${pdfPageCount === 1 ? "" : "s"} scanned.` : "."}
+              </p>
+              {rules.length > 0 ? (
+                <ul className="mt-3 max-h-64 space-y-3 overflow-y-auto pr-1">
+                  {rules.map((rule, idx) => (
+                    <li
+                      key={idx}
+                      className="border-l-2 border-[var(--accent)] pl-3 text-sm leading-relaxed text-[var(--foreground)]"
+                    >
+                      {rule.text}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-[var(--muted)]">
+                  No rule-like statements were detected in the uploaded policy document.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              No policy PDF was uploaded, so no rules were extracted for this analysis.
+            </p>
+          )}
+        </div>
       </section>
     </div>
   );

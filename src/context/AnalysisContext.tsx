@@ -10,6 +10,7 @@ export interface AnalysisResult {
   weights: RiskWeights;
   csvFileName: string;
   pdfFileName: string | null;
+  pdfPageCount: number | null;
   analysedAt: Date;
   isSampleData: boolean;
 }

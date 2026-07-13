@@ -45,15 +45,16 @@ export default function Home() {
         return;
       }
 
-      const rules = pdfFile ? (await parsePolicyPdf(pdfFile)).rules : [];
+      const pdfResult = pdfFile ? await parsePolicyPdf(pdfFile) : null;
       const scored = scoreAllCustomers(csvResult.customers, DEFAULT_WEIGHTS);
 
       setResult({
         customers: scored,
-        rules,
+        rules: pdfResult ? pdfResult.rules : [],
         weights: DEFAULT_WEIGHTS,
         csvFileName: csvFile.name,
         pdfFileName: pdfFile ? pdfFile.name : null,
+        pdfPageCount: pdfResult ? pdfResult.pageCount : null,
         analysedAt: new Date(),
         isSampleData: false,
       });
@@ -93,7 +94,7 @@ export default function Home() {
       const pdfFile = new File([pdfBlob], "sample-lending-policy.pdf", {
         type: "application/pdf",
       });
-      const { rules } = await parsePolicyPdf(pdfFile);
+      const { rules, pageCount } = await parsePolicyPdf(pdfFile);
       const scored = scoreAllCustomers(csvResult.customers, DEFAULT_WEIGHTS);
 
       setResult({
@@ -102,6 +103,7 @@ export default function Home() {
         weights: DEFAULT_WEIGHTS,
         csvFileName: "sample-customers.csv",
         pdfFileName: "sample-lending-policy.pdf",
+        pdfPageCount: pageCount,
         analysedAt: new Date(),
         isSampleData: true,
       });

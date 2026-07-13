@@ -28,7 +28,9 @@ const RULE_KEYWORDS = [
   "maximum",
 ];
 
-async function extractTextFromPdf(file: File): Promise<string> {
+async function extractTextFromPdf(
+  file: File
+): Promise<{ text: string; pageCount: number }> {
   const pdfjsLib = await import("pdfjs-dist");
   const workerUrl = new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -49,7 +51,7 @@ async function extractTextFromPdf(file: File): Promise<string> {
       .join(" ");
     fullText += pageText + "\n";
   }
-  return fullText;
+  return { text: fullText, pageCount: pdf.numPages };
 }
 
 function splitIntoStatements(text: string): string[] {
@@ -80,10 +82,11 @@ export function extractRulesFromText(text: string): ExtractedRule[] {
 export interface PdfParseResult {
   rawText: string;
   rules: ExtractedRule[];
+  pageCount: number;
 }
 
 export async function parsePolicyPdf(file: File): Promise<PdfParseResult> {
-  const rawText = await extractTextFromPdf(file);
+  const { text: rawText, pageCount } = await extractTextFromPdf(file);
   const rules = extractRulesFromText(rawText);
-  return { rawText, rules };
+  return { rawText, rules, pageCount };
 }
