@@ -1,25 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import UploadPanel from "@/components/UploadPanel";
-import Dashboard from "@/components/Dashboard";
 import { parseCustomerCsv } from "@/lib/csvParser";
 import { extractRulesFromText, parsePolicyPdf } from "@/lib/pdfParser";
 import { DEFAULT_WEIGHTS, scoreAllCustomers } from "@/lib/riskScoring";
-import { ExtractedRule, ScoredCustomer } from "@/lib/types";
 import { generateSampleCustomers, SAMPLE_POLICY_TEXT } from "@/lib/sampleData";
+import { useAnalysis } from "@/context/AnalysisContext";
 
 export default function Home() {
-  const [customers, setCustomers] = useState<ScoredCustomer[] | null>(null);
-  const [rules, setRules] = useState<ExtractedRule[]>([]);
+  const router = useRouter();
+  const { setResult } = useAnalysis();
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSampleData, setIsSampleData] = useState(false);
 
   async function handleAnalyse(pdfFile: File | null, csvFile: File | null) {
     setErrorMessage(null);
-    if (!pdfFile || !csvFile) {
-      setErrorMessage("Please upload both a policy PDF and a customer portfolio CSV.");
+    if (!csvFile) {
+      setErrorMessage("Please upload a customer portfolio CSV to run the analysis.");
       return;
     }
 
@@ -44,12 +43,19 @@ export default function Home() {
         return;
       }
 
-      const pdfResult = await parsePolicyPdf(pdfFile);
-
+      const rules = pdfFile ? (await parsePolicyPdf(pdfFile)).rules : [];
       const scored = scoreAllCustomers(csvResult.customers, DEFAULT_WEIGHTS);
-      setCustomers(scored);
-      setRules(pdfResult.rules);
-      setIsSampleData(false);
+
+      setResult({
+        customers: scored,
+        rules,
+        weights: DEFAULT_WEIGHTS,
+        csvFileName: csvFile.name,
+        pdfFileName: pdfFile ? pdfFile.name : null,
+        analysedAt: new Date(),
+        isSampleData: false,
+      });
+      router.push("/dashboard");
     } catch (err) {
       console.error(err);
       setErrorMessage(
@@ -62,40 +68,26 @@ export default function Home() {
 
   function handleLoadSample() {
     setErrorMessage(null);
-    const sampleCustomers = generateSampleCustomers(40);
+    const sampleCustomers = generateSampleCustomers(20);
     const scored = scoreAllCustomers(sampleCustomers, DEFAULT_WEIGHTS);
-    setCustomers(scored);
-    setRules(extractRulesFromText(SAMPLE_POLICY_TEXT));
-    setIsSampleData(true);
-  }
-
-  function handleReset() {
-    setCustomers(null);
-    setRules([]);
-    setErrorMessage(null);
-    setIsSampleData(false);
+    setResult({
+      customers: scored,
+      rules: extractRulesFromText(SAMPLE_POLICY_TEXT),
+      weights: DEFAULT_WEIGHTS,
+      csvFileName: "sample-customers.csv",
+      pdfFileName: "sample-lending-policy.pdf",
+      analysedAt: new Date(),
+      isSampleData: true,
+    });
+    router.push("/dashboard");
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-[var(--background)] px-4 py-8 sm:px-8">
-      {customers ? (
-        <Dashboard
-          customers={customers}
-          rules={rules}
-          weights={DEFAULT_WEIGHTS}
-          isSampleData={isSampleData}
-          onReset={handleReset}
-        />
-      ) : (
-        <div className="flex flex-1 items-center justify-center">
-          <UploadPanel
-            onAnalyse={handleAnalyse}
-            onLoadSample={handleLoadSample}
-            isProcessing={isProcessing}
-            errorMessage={errorMessage}
-          />
-        </div>
-      )}
-    </div>
+    <UploadPanel
+      onAnalyse={handleAnalyse}
+      onLoadSample={handleLoadSample}
+      isProcessing={isProcessing}
+      errorMessage={errorMessage}
+    />
   );
 }

@@ -124,3 +124,29 @@ export function recommendedActions(customers: ScoredCustomer[]): string[] {
 
   return actions;
 }
+
+export interface RiskDistributionBucket {
+  bucket: string;
+  count: number;
+  midpoint: number;
+}
+
+/**
+ * Buckets customers into risk-score deciles (0-9, 10-19, ... 90-100) so the
+ * distribution of risk across the portfolio can be visualised as a
+ * histogram.
+ */
+export function riskScoreDistribution(customers: ScoredCustomer[]): RiskDistributionBucket[] {
+  const buckets: RiskDistributionBucket[] = Array.from({ length: 10 }, (_, i) => ({
+    bucket: i === 9 ? "90-100" : `${i * 10}-${i * 10 + 9}`,
+    count: 0,
+    midpoint: i * 10 + 5,
+  }));
+
+  for (const c of customers) {
+    const idx = Math.min(Math.floor(c.riskScore / 10), 9);
+    buckets[idx].count += 1;
+  }
+
+  return buckets;
+}
