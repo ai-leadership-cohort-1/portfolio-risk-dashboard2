@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { DEFAULT_WEIGHTS, RISK_THRESHOLDS } from "@/lib/riskScoring";
 
 interface UploadPanelProps {
-  onAnalyse: (pdfFile: File | null, csvFile: File | null) => void;
+  pdfFile: File | null;
+  csvFile: File | null;
+  onPdfFileChange: (file: File | null) => void;
+  onCsvFileChange: (file: File | null) => void;
+  onAnalyse: () => void;
   onLoadSample: () => void;
   isProcessing: boolean;
   errorMessage: string | null;
@@ -14,14 +17,15 @@ const fileInputClasses =
   "block w-full text-sm text-[var(--muted)] file:mr-4 file:rounded-md file:border-0 file:bg-[#171a1f] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-[#000000] file:cursor-pointer cursor-pointer";
 
 export default function UploadPanel({
+  pdfFile,
+  csvFile,
+  onPdfFileChange,
+  onCsvFileChange,
   onAnalyse,
   onLoadSample,
   isProcessing,
   errorMessage,
 }: UploadPanelProps) {
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [csvFile, setCsvFile] = useState<File | null>(null);
-
   const canAnalyse = csvFile !== null && !isProcessing;
 
   return (
@@ -48,7 +52,7 @@ export default function UploadPanel({
             type="file"
             accept="application/pdf"
             className={`${fileInputClasses} mt-4`}
-            onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+            onChange={(e) => onPdfFileChange(e.target.files?.[0] || null)}
           />
           {pdfFile && (
             <p className="mt-2 text-xs text-[var(--muted)]">
@@ -69,7 +73,7 @@ export default function UploadPanel({
             type="file"
             accept=".csv,text/csv"
             className={`${fileInputClasses} mt-4`}
-            onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+            onChange={(e) => onCsvFileChange(e.target.files?.[0] || null)}
           />
           {csvFile && (
             <p className="mt-2 text-xs text-[var(--muted)]">
@@ -89,7 +93,7 @@ export default function UploadPanel({
         <button
           type="button"
           disabled={!canAnalyse}
-          onClick={() => onAnalyse(pdfFile, csvFile)}
+          onClick={onAnalyse}
           className="inline-flex items-center justify-center rounded-md bg-[var(--accent)] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-dark)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isProcessing ? "Analysing…" : "Run Analysis"}

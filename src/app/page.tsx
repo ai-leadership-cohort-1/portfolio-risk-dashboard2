@@ -14,10 +14,23 @@ const SAMPLE_PDF_PATH = "/sample-data/sample-lending-policy.pdf";
 export default function Home() {
   const router = useRouter();
   const { setResult } = useAnalysis();
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [isSampleSelected, setIsSampleSelected] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  async function handleAnalyse(pdfFile: File | null, csvFile: File | null) {
+  function handlePdfFileChange(file: File | null) {
+    setPdfFile(file);
+    setIsSampleSelected(false);
+  }
+
+  function handleCsvFileChange(file: File | null) {
+    setCsvFile(file);
+    setIsSampleSelected(false);
+  }
+
+  async function handleAnalyse() {
     setErrorMessage(null);
     if (!csvFile) {
       setErrorMessage("Please upload a customer portfolio CSV to run the analysis.");
@@ -56,7 +69,7 @@ export default function Home() {
         pdfFileName: pdfFile ? pdfFile.name : null,
         pdfPageCount: pdfResult ? pdfResult.pageCount : null,
         analysedAt: new Date(),
-        isSampleData: false,
+        isSampleData: isSampleSelected,
       });
       router.push("/dashboard");
     } catch (err) {
@@ -82,32 +95,20 @@ export default function Home() {
         throw new Error("Sample data files could not be loaded.");
       }
 
-      const csvText = await csvResponse.text();
-      const csvResult = parseCustomerCsv(csvText);
-
-      if (csvResult.missingColumns.length > 0 || csvResult.customers.length === 0) {
-        setErrorMessage("The bundled sample CSV appears to be invalid.");
-        return;
-      }
-
+      const csvBlob = await csvResponse.blob();
       const pdfBlob = await pdfResponse.blob();
-      const pdfFile = new File([pdfBlob], "sample-lending-policy.pdf", {
+      const sampleCsvFile = new File([csvBlob], "sample-customers.csv", {
+        type: "text/csv",
+      });
+      const samplePdfFile = new File([pdfBlob], "sample-lending-policy.pdf", {
         type: "application/pdf",
       });
-      const { rules, pageCount } = await parsePolicyPdf(pdfFile);
-      const scored = scoreAllCustomers(csvResult.customers, DEFAULT_WEIGHTS);
 
-      setResult({
-        customers: scored,
-        rules,
-        weights: DEFAULT_WEIGHTS,
-        csvFileName: "sample-customers.csv",
-        pdfFileName: "sample-lending-policy.pdf",
-        pdfPageCount: pageCount,
-        analysedAt: new Date(),
-        isSampleData: true,
-      });
-      router.push("/dashboard");
+      // Just populate the two upload boxes with the sample files — the
+      // person still clicks Run Analysis themselves, same as a manual upload.
+      setPdfFile(samplePdfFile);
+      setCsvFile(sampleCsvFile);
+      setIsSampleSelected(true);
     } catch (err) {
       console.error(err);
       setErrorMessage("Could not load the sample data. Please try again or upload your own files.");
@@ -118,6 +119,10 @@ export default function Home() {
 
   return (
     <UploadPanel
+      pdfFile={pdfFile}
+      csvFile={csvFile}
+      onPdfFileChange={handlePdfFileChange}
+      onCsvFileChange={handleCsvFileChange}
       onAnalyse={handleAnalyse}
       onLoadSample={handleLoadSample}
       isProcessing={isProcessing}
