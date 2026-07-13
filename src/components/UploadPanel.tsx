@@ -35,8 +35,8 @@ export default function UploadPanel({
       </h1>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--muted)]">
         Upload your lending policy document and customer portfolio to
-        generate an executive risk dashboard and board-ready summary. All
-        processing happens in your browser — no files are sent to a server.
+        generate an executive risk dashboard. All processing happens in your
+        browser — no files are sent to a server.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">

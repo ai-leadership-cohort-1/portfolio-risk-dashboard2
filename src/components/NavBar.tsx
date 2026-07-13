@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/", label: "Upload" },
   { href: "/dashboard", label: "Executive Dashboard" },
-  { href: "/summary", label: "Board Summary" },
 ];
 
 function LogoMark() {

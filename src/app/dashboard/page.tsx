@@ -137,31 +137,23 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 pb-16 sm:px-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold text-[var(--foreground)]">
-              Executive Dashboard
-            </h1>
-            {isSampleData && (
-              <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                Sample Data
-              </span>
-            )}
-          </div>
-          <p className="mt-1 text-xs text-[var(--muted)]">
-            {totalCustomers.toLocaleString()} customers · {csvFileName}
-            {pdfFileName ? ` · ${pdfFileName}` : " · no policy uploaded"} ·
-            analysed{" "}
-            {analysedAt.toLocaleDateString()}, {analysedAt.toLocaleTimeString()}
-          </p>
+      <div>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-[var(--foreground)]">
+            Executive Dashboard
+          </h1>
+          {isSampleData && (
+            <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+              Sample Data
+            </span>
+          )}
         </div>
-        <Link
-          href="/summary"
-          className="inline-flex items-center justify-center rounded-md border border-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent)] transition-colors hover:bg-[#f2f6fa] whitespace-nowrap"
-        >
-          View Board Executive Summary →
-        </Link>
+        <p className="mt-1 text-xs text-[var(--muted)]">
+          {totalCustomers.toLocaleString()} customers · {csvFileName}
+          {pdfFileName ? ` · ${pdfFileName}` : " · no policy uploaded"} ·
+          analysed{" "}
+          {analysedAt.toLocaleDateString()}, {analysedAt.toLocaleTimeString()}
+        </p>
       </div>
 
       {/* Category KPI cards */}
