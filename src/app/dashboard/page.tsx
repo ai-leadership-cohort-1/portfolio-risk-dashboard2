@@ -65,6 +65,37 @@ function formatCompactCurrency(value: number): string {
   }).format(value);
 }
 
+// The "Customers" bar is coloured per risk category (via per-cell fills),
+// not a single flat colour, so recharts' default legend (which reads the
+// Bar's own fill) can't represent it accurately. This custom legend spells
+// out what each colour actually means instead.
+function CategoryChartLegend() {
+  const categories: RiskCategory[] = ["Green", "Amber", "Red"];
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs text-[var(--muted)]">
+      <span className="flex items-center gap-3">
+        <span className="font-medium text-[var(--foreground)]">Customers</span>
+        {categories.map((cat) => (
+          <span key={cat} className="flex items-center gap-1.5">
+            <span
+              className="h-2.5 w-2.5 rounded-sm"
+              style={{ backgroundColor: CATEGORY_COLORS[cat] }}
+            />
+            {cat}
+          </span>
+        ))}
+      </span>
+      <span className="flex items-center gap-1.5 border-l border-[var(--border)] pl-5">
+        <span
+          className="h-2.5 w-2.5 rounded-sm"
+          style={{ backgroundColor: EXPOSURE_BAR_COLOR }}
+        />
+        Exposure
+      </span>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { result } = useAnalysis();
 
@@ -183,7 +214,7 @@ export default function DashboardPage() {
                   name === "exposure" ? formatCurrency(Number(value)) : value
                 }
               />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Legend content={<CategoryChartLegend />} />
               <Bar yAxisId="left" dataKey="count" name="Customers" radius={[4, 4, 0, 0]}>
                 {combinedCategoryData.map((entry) => (
                   <Cell key={entry.category} fill={CATEGORY_COLORS[entry.category as RiskCategory]} />
