@@ -40,7 +40,7 @@ export default function SummaryPage() {
     );
   }
 
-  const { customers, rules, csvFileName, pdfFileName, analysedAt } = result;
+  const { customers, rules, csvFileName, pdfFileName, analysedAt, isSampleData } = result;
 
   const categorySummary = summariseByCategory(customers);
   const totalCustomers = customers.length;
@@ -56,9 +56,16 @@ export default function SummaryPage() {
     <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8 pb-16 sm:px-8 print:px-0">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between print:hidden">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--foreground)]">
-            Board Executive Summary
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold text-[var(--foreground)]">
+              Board Executive Summary
+            </h1>
+            {isSampleData && (
+              <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                Sample Data
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-xs text-[var(--muted)]">
             {csvFileName}
             {pdfFileName ? ` · ${pdfFileName}` : ""} · analysed{" "}

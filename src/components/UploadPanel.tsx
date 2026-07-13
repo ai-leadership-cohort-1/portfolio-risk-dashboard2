@@ -50,6 +50,11 @@ export default function UploadPanel({
             className={`${fileInputClasses} mt-4`}
             onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
           />
+          {pdfFile && (
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              Selected: <span className="font-medium text-[var(--foreground)]">{pdfFile.name}</span>
+            </p>
+          )}
         </div>
 
         <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
@@ -66,6 +71,11 @@ export default function UploadPanel({
             className={`${fileInputClasses} mt-4`}
             onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
           />
+          {csvFile && (
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              Selected: <span className="font-medium text-[var(--foreground)]">{csvFile.name}</span>
+            </p>
+          )}
         </div>
       </div>
 

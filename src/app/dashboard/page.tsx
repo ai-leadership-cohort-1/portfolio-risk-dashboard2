@@ -118,7 +118,7 @@ export default function DashboardPage() {
     );
   }
 
-  const { customers, rules, weights, csvFileName, pdfFileName, pdfPageCount, analysedAt } = result;
+  const { customers, rules, weights, csvFileName, pdfFileName, pdfPageCount, analysedAt, isSampleData } = result;
 
   const categorySummary = summariseByCategory(customers);
   const topRisky = topRiskiestCustomers(customers, 10);
@@ -139,9 +139,16 @@ export default function DashboardPage() {
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 pb-16 sm:px-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--foreground)]">
-            Executive Dashboard
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold text-[var(--foreground)]">
+              Executive Dashboard
+            </h1>
+            {isSampleData && (
+              <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                Sample Data
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-xs text-[var(--muted)]">
             {totalCustomers.toLocaleString()} customers · {csvFileName}
             {pdfFileName ? ` · ${pdfFileName}` : " · no policy uploaded"} ·
