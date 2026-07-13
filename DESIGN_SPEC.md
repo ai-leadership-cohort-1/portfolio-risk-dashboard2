@@ -365,9 +365,24 @@ Footer (in `layout.tsx`, below `<main>`): a single centered muted line —
 *"Prototype for internal review only. No real customer data. All processing
 happens locally in your browser — nothing is uploaded to a server."*
 
-## 13. Sample data files
+## 13. Sample data files — copy verbatim, never regenerate
 
-Two real, non-synthetic files must be bundled at `public/sample-data/`:
+The canonical source files live at
+`/Users/[user]/NABImmersion3/sample-data/sample-customers.csv` and
+`sample-lending-policy.pdf` (same directory this `DESIGN_SPEC.md` ships in,
+so they travel with the guardrail configs to every laptop). **The build step
+must copy these two files byte-for-byte into `public/sample-data/` in the new
+project. Do not write a script or prompt an AI to generate new sample rows,
+new company names, new PDF wording, or "similar" data — any regeneration,
+even one that follows the shape described below, will produce different KPI
+numbers, a different top-10 table, and different extracted policy rules on
+every machine, which defeats the entire point of this spec.**
+
+If, and only if, the canonical files are genuinely missing from
+`NABImmersion3/sample-data/` on a given machine, fall back to recreating data
+matching this shape exactly, then immediately save the result back into
+`NABImmersion3/sample-data/` so it becomes the new canonical copy for that
+machine going forward (do not let two laptops silently diverge):
 - `sample-customers.csv` — 50 rows (header + 50 data rows), columns
   `CustomerID,CustomerName,Industry,CreditScore,RepaymentStatus,LoanBalance`.
   IDs `C001`–`C050`. Mix of industries: Manufacturing, Retail, Agriculture,
@@ -381,13 +396,17 @@ Two real, non-synthetic files must be bundled at `public/sample-data/`:
   provisioning, and collateral requirements — written so the keyword
   extraction in §8 picks up 6–8 rules from it.
 
+This "fallback" path is a last resort for machine #1 only, not a normal part
+of the build — once canonical files exist in `NABImmersion3/sample-data/`,
+every subsequent laptop and every subsequent run must copy them as-is.
+
 **Do not regenerate these from a synthetic data generator function** —
 earlier iterations of this project used a `generateSampleCustomers()`
 function and a hard-coded `SAMPLE_POLICY_TEXT` string; both were deliberately
-replaced with these real bundled files because Load Sample Data must exercise
-the exact same CSV/PDF parsing code path as a manual upload, not a shortcut.
-If `src/lib/sampleData.ts` exists from scaffolding, it is legacy/unused —
-either delete it or never import from it.
+replaced with real bundled files because Load Sample Data must exercise the
+exact same CSV/PDF parsing code path as a manual upload, not a shortcut. If
+`src/lib/sampleData.ts` exists from scaffolding, it is legacy/unused — either
+delete it or never import from it.
 
 ## 14. Repo hygiene
 
