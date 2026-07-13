@@ -1,0 +1,21 @@
+CustomerID,CustomerName,Industry,CreditScore,RepaymentStatus,LoanBalance
+C001,Acme Manufacturing,Manufacturing,710,Current,1250000
+C002,Harborview Retail,Retail,590,30 Days Late,480000
+C003,Southern Agri Co,Agriculture,640,Current,2100000
+C004,BlueSky Logistics,Transport,520,90+ Days Late,1750000
+C005,Crestline Property Group,Property,680,Current,3400000
+C006,Nexus Health Partners,Healthcare,750,Current,890000
+C007,Ironbridge Construction,Construction,505,Default,2600000
+C008,Coastal Hospitality,Hospitality,600,60 Days Late,1120000
+C009,Vantage Tech Solutions,Technology,720,Current,650000
+C010,Prairie Farms Ltd,Agriculture,560,30 Days Late,1980000
+C011,Metro Retail Group,Retail,470,Default,3100000
+C012,Summit Energy,Energy,695,Current,4200000
+C013,Golden Gate Foods,Food & Beverage,610,Current,760000
+C014,Redwood Transport,Transport,540,60 Days Late,1340000
+C015,Alpine Construction,Construction,780,Current,980000
+C016,Lakeside Manufacturing,Manufacturing,630,30 Days Late,1560000
+C017,Northstar Property,Property,660,Current,2900000
+C018,Pioneer Agriculture,Agriculture,500,90+ Days Late,2250000
+C019,Central Health Group,Healthcare,700,Current,1080000
+C020,Delta Hospitality,Hospitality,455,Default,1900000

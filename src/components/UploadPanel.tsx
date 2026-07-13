@@ -90,7 +90,7 @@ export default function UploadPanel({
           disabled={isProcessing}
           className="inline-flex items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[#f2f6fa] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Load Sample Data
+          {isProcessing ? "Loading…" : "Load Sample Data"}
         </button>
       </div>
 

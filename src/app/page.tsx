@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import UploadPanel from "@/components/UploadPanel";
 import { parseCustomerCsv } from "@/lib/csvParser";
-import { extractRulesFromText, parsePolicyPdf } from "@/lib/pdfParser";
+import { parsePolicyPdf } from "@/lib/pdfParser";
 import { DEFAULT_WEIGHTS, scoreAllCustomers } from "@/lib/riskScoring";
-import { generateSampleCustomers, SAMPLE_POLICY_TEXT } from "@/lib/sampleData";
 import { useAnalysis } from "@/context/AnalysisContext";
+
+const SAMPLE_CSV_PATH = "/sample-data/sample-customers.csv";
+const SAMPLE_PDF_PATH = "/sample-data/sample-lending-policy.pdf";
 
 export default function Home() {
   const router = useRouter();
@@ -66,20 +68,50 @@ export default function Home() {
     }
   }
 
-  function handleLoadSample() {
+  async function handleLoadSample() {
     setErrorMessage(null);
-    const sampleCustomers = generateSampleCustomers(20);
-    const scored = scoreAllCustomers(sampleCustomers, DEFAULT_WEIGHTS);
-    setResult({
-      customers: scored,
-      rules: extractRulesFromText(SAMPLE_POLICY_TEXT),
-      weights: DEFAULT_WEIGHTS,
-      csvFileName: "sample-customers.csv",
-      pdfFileName: "sample-lending-policy.pdf",
-      analysedAt: new Date(),
-      isSampleData: true,
-    });
-    router.push("/dashboard");
+    setIsProcessing(true);
+    try {
+      const [csvResponse, pdfResponse] = await Promise.all([
+        fetch(SAMPLE_CSV_PATH),
+        fetch(SAMPLE_PDF_PATH),
+      ]);
+
+      if (!csvResponse.ok || !pdfResponse.ok) {
+        throw new Error("Sample data files could not be loaded.");
+      }
+
+      const csvText = await csvResponse.text();
+      const csvResult = parseCustomerCsv(csvText);
+
+      if (csvResult.missingColumns.length > 0 || csvResult.customers.length === 0) {
+        setErrorMessage("The bundled sample CSV appears to be invalid.");
+        return;
+      }
+
+      const pdfBlob = await pdfResponse.blob();
+      const pdfFile = new File([pdfBlob], "sample-lending-policy.pdf", {
+        type: "application/pdf",
+      });
+      const { rules } = await parsePolicyPdf(pdfFile);
+      const scored = scoreAllCustomers(csvResult.customers, DEFAULT_WEIGHTS);
+
+      setResult({
+        customers: scored,
+        rules,
+        weights: DEFAULT_WEIGHTS,
+        csvFileName: "sample-customers.csv",
+        pdfFileName: "sample-lending-policy.pdf",
+        analysedAt: new Date(),
+        isSampleData: true,
+      });
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setErrorMessage("Could not load the sample data. Please try again or upload your own files.");
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   return (
